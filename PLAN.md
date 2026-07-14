@@ -5,7 +5,7 @@
 >
 > This is a living plan. We are "building the ship as we sail it" — expect this file
 > to change. It supersedes the more elaborate infrastructure in the original 90-day
-> concept note (see [`broad context document/`](broad%20context%20document/)); where the two
+> concept note (kept in the team's internal planning notes); where the two
 > disagree, this plan and the [decision log](docs/DECISIONS.md) win.
 
 ---
@@ -33,14 +33,19 @@ under-five pneumonia/malaria/diarrhea; stunting drivers) is called out in the co
 as a "major differentiator." It starts as a feature inside Country Profiles / Indicator
 Explorer and can graduate to its own tool later.
 
-**Two things are treated as first-class requirements** (from Omar's email):
+**These are first-class requirements** — treated as non-negotiable from the start, on every page and
+in every tool:
 
 1. **Shareable links** — a user can copy a URL that reproduces their exact selection
    (country, indicator, year). Selection state lives in the URL query string.
 2. **Social embedding** — pasting a tool link into social media / chat shows a good
    preview card (Open Graph / Twitter card image + title + description).
+3. **Responsive** — works well on both desktop and mobile.
+4. **Light and dark mode** — respects the visitor's system theme, and is legible in both.
 
-Both work identically whether we use subfolders or subdomains — see [DECISIONS](docs/DECISIONS.md).
+Shareable links and social embedding work identically whether we use subfolders or subdomains — see
+[DECISIONS](docs/DECISIONS.md). Notes on building for responsive + light/dark are in
+[ARCHITECTURE](docs/ARCHITECTURE.md).
 
 ---
 
@@ -124,7 +129,7 @@ childhealth2050/                 repo root = site root (served at childhealth205
 ├── countries-like-mine/         Tool 3 — Countries Like Mine
 ├── trajectories/                Tool 4 — Future Trajectories
 ├── docs/                        architecture, decisions, editing & deployment guides
-└── broad context document/      original concept note + email (context; not published)
+└── broad context document/      internal planning notes (kept local, never published)
 ```
 
 Every folder above contains a `README.md` describing its purpose and conventions.
@@ -172,9 +177,8 @@ comparative-learning workflow first.
   the natural default).
 - **Exact folder/URL names** — `data`, `countries-like-mine`, `trajectories` are provisional
   and cheap to rename now, expensive after we share links publicly.
-- **Repo visibility.** If the repo is public (simplest free Pages), the `broad context document/`
-  folder (internal email) must not be published — currently git-ignored for safety. See
-  [DEPLOYMENT](docs/DEPLOYMENT.md).
-- **Timing.** Omar's preference was to wait until related papers/profile materials mature and a
-  Claude Code subscription is in place before investing heavily. This scaffold is deliberately
-  content-free so it's ready when that content arrives.
+- **Repo visibility — settled.** The repo is public (free GitHub Pages); the internal planning
+  notes stay git-ignored and were never committed. See [DEPLOYMENT](docs/DEPLOYMENT.md).
+- **Timing.** The plan is to wait until related papers and profile materials mature before
+  investing heavily. This scaffold is deliberately content-free so it's ready when that content
+  arrives.

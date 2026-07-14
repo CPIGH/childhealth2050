@@ -54,12 +54,15 @@ See [docs/DATA-PIPELINE.md](docs/DATA-PIPELINE.md).
 
 ## Deploy
 
-GitHub Pages from this repo, custom domain `childhealth2050.org`. See
-[docs/DEPLOYMENT.md](docs/DEPLOYMENT.md). **Before making the repo public, read the note there
-about the `broad context document/` folder.**
+Public GitHub repo → GitHub Pages; the custom domain `childhealth2050.org` gets added once DNS
+access is available. Routine content updates publish with `python tools/publish.py` (or
+double-click `tools/publish.cmd`). See [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md), including the note
+on keeping internal material out of the public repo.
 
 ## Status
 
-Phase 0 — scaffold only. Folders and docs exist; there is no data or working tool yet. This is
-intentional: the structure is ready for content to be poured in when the related papers and
-profile materials mature.
+Early scaffold. The structure, docs, and a click-through skeleton exist — a landing page, four
+placeholder tool pages with shared nav/styling, and Country Profiles that render authors' Word
+(`.docx`) files in the browser. There's no real data or finished tool yet; the structure is ready
+for content as the related papers and profile materials mature. Every page must stay **responsive
+(desktop + mobile)** and **light/dark‑mode aware** — see [PLAN.md](PLAN.md).

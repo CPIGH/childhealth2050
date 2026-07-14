@@ -13,9 +13,9 @@ renders it in the browser with [mammoth.js](https://github.com/mwilliamson/mammo
 `assets/js/mammoth.browser.min.js`). No Markdown for profiles, and **no conversion step** — the
 `.docx` is the single source of truth. A `_TEMPLATE.docx` seeds new profiles.
 
-**Context:** The profile authors are non-technical and unlikely to want Markdown or GitHub. Omar's
-email already floated keeping Word files with a `.docx → .md` conversion. Two sub-problems were
-separated: (a) *authoring format* and (b) *publishing to GitHub* — authors are shielded from both.
+**Context:** The profile authors are non-technical and unlikely to want Markdown or GitHub. The
+initial plan already floated keeping Word files with a `.docx → .md` conversion. Two sub-problems
+were separated: (a) *authoring format* and (b) *publishing to GitHub* — authors are shielded from both.
 
 **Why this over the alternatives:**
 
@@ -63,9 +63,9 @@ only that. That's a real and standard pattern for bigger projects.
 
 **Why keep it flat for now:**
 
-- **Simplest, and matches the plan.** Serving from root is the zero-config GitHub Pages setup Omar
-  described. A `site/`-only deploy needs either the confusingly-named `/docs` publishing option or a
-  GitHub Actions workflow — a moving part we don't need yet.
+- **Simplest, and matches the plan.** Serving from root is the zero-config GitHub Pages setup the
+  initial plan described. A `site/`-only deploy needs either the confusingly-named `/docs` publishing
+  option or a GitHub Actions workflow — a moving part we don't need yet.
 - **The only thing separation buys is "tooling files aren't publicly downloadable."** On a static
   host every committed file is fetchable by URL regardless; the safeguard that actually matters is
   *keeping sensitive things out of git*, which we already do (raw data + internal docs are
@@ -76,7 +76,7 @@ only that. That's a real and standard pattern for bigger projects.
   "site vs. everything else" split really wants a static-site generator — the more elaborate path
   we're deliberately deferring (ADR-002).
 - **Don't nest the subsites.** A `tools/profiles` layout would just add a pointless URL segment and
-  muddy the shareable links Omar cares about.
+  muddy the shareable links the project prioritizes.
 
 A [`.nojekyll`](../.nojekyll) file makes Pages serve every folder verbatim (no Jekyll build), so
 storage folders behave predictably.
@@ -109,7 +109,7 @@ using subfolders. The things that matter here point clearly at subfolders:
    shared code/data turns into a cross-repo dependency (a published package, a git submodule, or
    copy-paste). That is exactly the coupling we were trying to keep simple.
 
-2. **The two things Omar flagged as important — shareable links and social embedding — are
+2. **The two things flagged as important — shareable links and social embedding — are
    path-agnostic.** `childhealth2050.org/profiles/?country=NGA` is just as shareable as
    `profiles.childhealth2050.org/?country=NGA`, and Open Graph / Twitter preview cards are set
    per-page (per-path), not per-domain. We give up nothing on either front.
@@ -156,9 +156,9 @@ themselves.
 **GitHub Pages**. No application server, no database.
 
 **Context:** The original 90-day concept note sketched a full stack — Next.js/React frontend,
-Python/FastAPI backend, PostgreSQL, DuckDB, deployed on Vercel. Omar's follow-up email
-consciously simplified this: "as a starting point, GitHub Pages linked to the childhealth2050
-url would be enough." The existing dashboard already works this way — small, rounded data files
+Python/FastAPI backend, PostgreSQL, DuckDB, deployed on Vercel. A follow-up planning decision
+consciously simplified this: as a starting point, GitHub Pages linked to the childhealth2050
+URL is enough. The existing dashboard already works this way — small, rounded data files
 loaded on demand when a figure is opened.
 
 **Why:** It's the least infrastructure that meets the requirement, it's free, it matches what
@@ -182,7 +182,7 @@ without code. Raw and intermediate data stay **off git**; only the cleaned lean 
 under [`assets/data/`](../assets/data/); processing scripts live in
 [`data-processing/`](../data-processing/). See ADR-004/005 for the folder specifics.
 
-**Why:** Directly from Omar's email — let section owners edit their own text (optionally via a
+**Why:** Directly from the project's plan — let section owners edit their own text (optionally via a
 `.docx → .md` step) without a developer, and keep the repo lean by never committing bulky raw
 data. See [CONTENT-EDITING](CONTENT-EDITING.md) and [DATA-PIPELINE](DATA-PIPELINE.md).
 

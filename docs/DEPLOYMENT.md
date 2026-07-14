@@ -76,25 +76,19 @@ new maintainer access to the Box folder + push rights on the repo, have them run
 `git config --global --add safe.directory "<repo path>"`, and they become the publish machine. Nothing
 is tied to your machine or your account.
 
-## ⚠️ Before making the repo public: internal docs
+## ⚠️ Keeping internal material out of the public repo
 
-GitHub Pages is simplest (and free) on a **public** repo — but a public repo means **every file
-is publicly viewable**, including anything not part of the site.
+The repo is **public** (the simplest, free way to run Pages), which means **every committed file is
+publicly viewable**. So nothing internal goes into git.
 
-The [`broad context document/`](../broad%20context%20document/) folder contains the original
-concept note and an **internal email thread** (names, addresses, internal discussion). It must
-**not** be published. Current safeguard: that folder is listed in [`.gitignore`](../.gitignore),
-so it stays local as context but is never committed/pushed.
+The `broad context document/` folder holds internal planning notes that should not be published. It
+is listed in [`.gitignore`](../.gitignore), so it stays local (and shared with the team via Box) but
+is **never committed or pushed** — and never has been. Leave it that way.
 
-Choose one before publishing:
-
-- **Keep the repo private** (Pages on private repos needs a paid GitHub plan) → you *may* then
-  track the context folder if you want it shared with collaborators (remove it from `.gitignore`).
-- **Keep the repo public** → leave the context folder git-ignored (or move it out of the repo
-  entirely). Double-check nothing else sensitive is committed.
-
-When in doubt, keep it ignored. It's easy to start tracking a file later; it's hard to un-publish
-one that was already pushed to a public repo.
+Ongoing rule: keep sensitive material out of git. Raw data lives in the git-ignored
+`data-processing/raw/` (and `intermediate/`), and `.gitignore` guards both. If you ever need to
+*track* internal material in version control, the only safe place is a **separate private repo** —
+never this public one, because Pages exposes every file and history is hard to scrub after a push.
 
 ## Shareable links & social cards
 

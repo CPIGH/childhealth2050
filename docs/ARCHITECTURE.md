@@ -66,6 +66,22 @@ pays off — one change updates all four tools.
   image from `assets/`) so links unfurl nicely when shared. These are per-page, so subfolders vs.
   subdomains makes no difference here.
 
+## Responsive + light/dark (first-class)
+
+Every page and every tool — including charts — must work well on **desktop and mobile** and in both
+**light and dark mode**. Treat these as non-negotiable while building, not polish added later:
+
+- **Responsive:** fluid layouts (relative units, flexbox/grid), a `<meta name="viewport">` on every
+  page, and `@media` breakpoints where needed. Wide content (tables, charts, code) scrolls inside
+  its own container — the page body must never scroll sideways. Test each page at a narrow
+  (phone-width) viewport.
+- **Theme:** drive colours from CSS custom properties + `prefers-color-scheme`; never hard-code a
+  colour that only reads on one background. Charts must choose legible, sufficient-contrast colours
+  in **both** themes. Test each page in light and dark.
+- The shared [`assets/css/site.css`](../assets/css/site.css) already sets this up — `color-scheme`,
+  a `prefers-color-scheme: dark` override, a responsive auto-fit grid, and relative units. Keep it
+  true as real tools and figures are added; extend the shared variables rather than hard-coding.
+
 ## Tooling: undecided, deliberately
 
 The scaffold is framework-agnostic. Two realistic paths:

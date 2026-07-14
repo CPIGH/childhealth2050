@@ -1,0 +1,39 @@
+# --- Internal / not for publishing -------------------------------------------
+# Original concept note + internal email thread. Kept locally as context, but
+# NOT published. If the repo is PRIVATE and you want this shared with
+# collaborators, remove the line below. See docs/DEPLOYMENT.md before making the
+# repo public.
+broad context document/
+
+# --- Raw / intermediate data (must never enter the repo) ---------------------
+# Only the cleaned final files (in assets/data/) are committed. Raw + intermediate
+# stay local. The empty folders are kept via .gitkeep; their contents are ignored.
+# See docs/DATA-PIPELINE.md.
+data-processing/raw/*
+!data-processing/raw/.gitkeep
+data-processing/intermediate/*
+!data-processing/intermediate/.gitkeep
+/data-raw/
+*.raw.csv
+*.raw.parquet
+
+# --- OS / editor -------------------------------------------------------------
+.DS_Store
+Thumbs.db
+desktop.ini
+*~
+.vscode/
+.idea/
+
+# --- R (data-processing) -----------------------------------------------------
+.Rhistory
+.RData
+.Rproj.user/
+.Ruserdata
+# If you adopt renv for reproducible environments, keep renv.lock committed but
+# ignore the local library:
+# renv/library/
+
+# --- Python (the tools/ scripts) ---------------------------------------------
+__pycache__/
+*.pyc

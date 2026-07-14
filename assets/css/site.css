@@ -1,0 +1,81 @@
+/* Shared design system (placeholder). One stylesheet for the whole site. */
+
+:root {
+  --maxw: 960px;
+  --fg: #1b1b1b;
+  --muted: #5c5c5c;
+  --bg: #ffffff;
+  --line: rgba(0, 0, 0, 0.14);
+  --card: rgba(0, 0, 0, 0.03);
+  --accent: #12796a;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --fg: #e9e9e9;
+    --muted: #a2a2a2;
+    --bg: #141414;
+    --line: rgba(255, 255, 255, 0.16);
+    --card: rgba(255, 255, 255, 0.05);
+    --accent: #4cc9b4;
+  }
+}
+
+* { box-sizing: border-box; }
+html { color-scheme: light dark; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font: 16px/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+.wrap { max-width: var(--maxw); margin-inline: auto; padding: 1.5rem 1.25rem 4rem; }
+
+/* top navigation (shared across every page) */
+.site-nav { border-bottom: 1px solid var(--line); }
+.site-nav .wrap { display: flex; flex-wrap: wrap; align-items: center; gap: 0.6rem 1.4rem; padding-block: 0.9rem; }
+.site-nav .brand { font-weight: 700; text-decoration: none; margin-right: auto; }
+.site-nav a.tool { text-decoration: none; color: var(--muted); font-size: 0.95rem; }
+.site-nav a.tool:hover,
+.site-nav a.tool[aria-current="page"] { color: var(--fg); }
+
+/* placeholder banner */
+.placeholder {
+  margin: 1rem 0 2rem;
+  padding: 0.65rem 0.9rem;
+  border: 1px dashed var(--line);
+  border-radius: 8px;
+  background: var(--card);
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+h1 { font-size: 1.9rem; margin: 0.3rem 0 0.3rem; }
+.tagline { font-size: 1.1rem; color: var(--muted); margin: 0 0 1.6rem; }
+.back { display: inline-block; margin-bottom: 1rem; color: var(--muted); text-decoration: none; font-size: 0.9rem; }
+.back:hover { color: var(--fg); }
+
+/* landing cards */
+.grid { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+a.card {
+  display: block; padding: 1.2rem 1.4rem; border: 1px solid var(--line); border-radius: 12px;
+  background: var(--card); text-decoration: none; color: inherit;
+  transition: border-color 0.15s, transform 0.15s;
+}
+a.card:hover { border-color: var(--fg); transform: translateY(-2px); }
+a.card h2 { margin: 0 0 0.3rem; font-size: 1.1rem; }
+a.card p { margin: 0; color: var(--muted); font-size: 0.92rem; }
+
+/* country chips (profiles list) */
+.country-list { list-style: none; padding: 0; display: flex; flex-wrap: wrap; gap: 0.6rem; }
+.country-list a {
+  display: inline-block; padding: 0.45rem 0.95rem; border: 1px solid var(--line);
+  border-radius: 999px; text-decoration: none;
+}
+.country-list a:hover { border-color: var(--fg); }
+
+/* rendered markdown */
+.prose { max-width: 70ch; }
+.prose h1 { font-size: 1.6rem; }
+.prose h2 { font-size: 1.25rem; margin-top: 1.7rem; }
+.prose h3 { font-size: 1.05rem; margin-top: 1.3rem; }
+.prose a { color: var(--accent); }

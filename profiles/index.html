@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Country Profiles — Child Health 2050</title>
+  <meta name="description" content="Per-country child health scorecards and narratives." />
+  <link rel="stylesheet" href="../assets/css/site.css" />
+  <!-- Renders authors' Word (.docx) files in the browser. Vendored locally (no CDN). -->
+  <script src="../assets/js/mammoth.browser.min.js"></script>
+</head>
+<body>
+  <nav class="site-nav"><div class="wrap">
+    <a class="brand" href="../">Child Health 2050</a>
+    <a class="tool" href="../profiles/" aria-current="page">Country Profiles</a>
+    <a class="tool" href="../data/">Indicator Explorer</a>
+    <a class="tool" href="../countries-like-mine/">Countries Like Mine</a>
+    <a class="tool" href="../trajectories/">Future Trajectories</a>
+  </div></nav>
+
+  <main class="wrap">
+    <a class="back" href="../" id="back" hidden>← All countries</a>
+
+    <!-- shown when no ?country= is selected -->
+    <section id="list">
+      <h1>Country Profiles</h1>
+      <p class="tagline">Pick a country to see its profile.</p>
+      <p class="placeholder">
+        Placeholder. Each country is a <strong>Word document</strong> in <code>content/profiles/</code>
+        (named as you want the link to read). The list below is generated from
+        <code>profiles.json</code> — add a <code>.docx</code>, republish, and it appears here.
+      </p>
+      <ul class="country-list" id="country-list"></ul>
+    </section>
+
+    <!-- shown when a ?country= is selected; filled from the .docx file -->
+    <article id="view" class="prose" hidden></article>
+  </main>
+
+  <script>
+    const PROFILES_JSON = "../content/profiles/profiles.json";
+    const escapeHtml = s => s.replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+    const note = msg => `<div class="placeholder">${msg}</div>`;
+    const serverHint =
+      `If you opened this page as a file (<code>file://</code>), the browser blocks loading local files. ` +
+      `Run a local server from the repo root — <code>python -m http.server 8000</code> — then open ` +
+      `<code>http://localhost:8000/profiles/</code>.`;
+
+    let _manifest = null;
+    async function manifest() {
+      if (_manifest) return _manifest;
+      const res = await fetch(PROFILES_JSON, { cache: "no-cache" });
+      if (!res.ok) throw new Error("profiles.json HTTP " + res.status);
+      _manifest = await res.json();
+      return _manifest;
+    }
+
+    async function showList() {
+      const ul = document.getElementById("country-list");
+      try {
+        const items = await manifest();
+        ul.innerHTML = items.length
+          ? items.map(e => `<li><a href="?country=${encodeURIComponent(e.slug)}">${escapeHtml(e.label)}</a></li>`).join("")
+          : "<li>(no profiles yet — drop a .docx into content/profiles/)</li>";
+      } catch (e) {
+        ul.innerHTML = `<li>${note("Couldn't load the profile list (" + e.message + "). " + serverHint)}</li>`;
+      }
+    }
+
+    async function showCountry(slug) {
+      const view = document.getElementById("view");
+      if (typeof mammoth === "undefined") {
+        view.innerHTML = note("The document renderer (<code>assets/js/mammoth.browser.min.js</code>) didn't load.");
+        return;
+      }
+      try {
+        const entry = (await manifest()).find(e => e.slug === slug);
+        if (!entry) throw new Error("no profile named “" + slug + "”");
+        const res = await fetch("../content/profiles/" + encodeURIComponent(entry.file));
+        if (!res.ok) throw new Error("HTTP " + res.status);
+        const result = await mammoth.convertToHtml({ arrayBuffer: await res.arrayBuffer() });
+        view.innerHTML = result.value;
+        document.title = entry.label + " — Country Profile";
+      } catch (e) {
+        view.innerHTML = note(`Couldn't load that profile (${e.message}). ` + serverHint);
+      }
+    }
+
+    (function () {
+      const slug = new URLSearchParams(location.search).get("country");
+      document.getElementById("list").hidden = !!slug;
+      document.getElementById("view").hidden = !slug;
+      document.getElementById("back").hidden = !slug;
+      if (slug) showCountry(slug); else showList();
+    })();
+  </script>
+</body>
+</html>

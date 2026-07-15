@@ -12,9 +12,19 @@
 
 ## 1. What we are building
 
-A public dashboard that helps people answer one core question:
+A public site that helps people answer one core question:
 
 > **"What can I learn from countries like mine that achieved better child health outcomes?"**
+
+At its core this is a **data dashboard**. The four tools are not four separate products — they
+are four **ways to slice, compare, and emphasize the same underlying data**. Each subdirectory just
+frames the numbers differently: one country at a glance, one indicator across countries, a country
+against statistically-similar peers, or a country's path to 2050.
+
+But it is **not *only* a dashboard.** Country Profiles, in particular, wraps the figures in a small
+amount of **standardized written context** (see below), and some countries will get a richer
+author-written **deepdive**. So think of it as a dashboard first, with light editorial context layered
+on top.
 
 The goal is **not** a perfect platform. It is the smallest genuinely useful version that
 demonstrates that comparative-learning value, then grows.
@@ -23,15 +33,39 @@ The site is organized as a **landing page** that routes to four tools:
 
 | # | Tool | Path | What it does |
 |---|------|------|--------------|
-| 1 | **Country Profiles** | [`/profiles`](profiles/) | Per-country scorecard: indicators, equity, financing, future outlook, and a short "what makes this country unique" narrative. |
+| 1 | **Country Profiles** | [`/profiles`](profiles/) | Per-country dashboard: figures, tables and background statistics, plus a little standardized written context — and a prominent link to an author **deepdive** where one exists. |
 | 2 | **Indicator Explorer** | [`/data`](data/) | Browse and compare indicators across countries and time; historical trends and indicator switching. |
-| 3 | **Countries Like Mine** | [`/countries-like-mine`](countries-like-mine/) | Find comparator countries by baseline indicator, income, poverty, governance, health spending — and surface "positive deviants" that did better. |
+| 3 | **Countries Like Mine** | [`/countries-like-mine`](countries-like-mine/) | Find statistically-similar countries (GDP, mortality, life expectancy, location, …) — automatically or on dimensions you choose — and surface "positive deviants" that did better. |
 | 4 | **Future Trajectories** | [`/trajectories`](trajectories/) | Baseline forecasts to 2050 with uncertainty and historical comparison. |
 
 A **Cause Explorer** (cause-specific burden: e.g. neonatal prematurity/sepsis/asphyxia;
 under-five pneumonia/malaria/diarrhea; stunting drivers) is called out in the concept note
 as a "major differentiator." It starts as a feature inside Country Profiles / Indicator
 Explorer and can graduate to its own tool later.
+
+### How the tools relate — one dataset, shared controls
+
+Because the tools share one dataset, they also share the controls that pick what you look at:
+
+- **Country selection is a searchable tree of *all* countries** (grouped, with a search box), used
+  everywhere a country is chosen. Where an author **deepdive** exists, that country is flagged in the
+  tree so users can find it. See [ARCHITECTURE](docs/ARCHITECTURE.md).
+- **Defaults first, customization optional.** The site should be easy to navigate, so we never force
+  a user through a wall of selections. Every control has a sensible **default**; deeper customization
+  lives behind a **pop-up / drop-down** the user opens only if they want it. Defaults are encoded in
+  the URL so shareable links still reproduce a view. This is a site-wide rule — see §1.1.
+
+### 1.1 Design principle: defaults over decisions
+
+Treat this as non-negotiable, alongside the four requirements below:
+
+- Landing on any tool shows something useful **immediately**, with no required setup — a sensible
+  default country / indicator / comparison is already applied.
+- Anything beyond the default (change the comparison basis, add countries, switch indicator, tune the
+  number of comparators, …) is **available but tucked away** — a drop-down, a "Customize" pop-up, an
+  "Advanced" panel — not in the user's face.
+- Whatever the user *does* choose is written to the **URL**, so the customized view is shareable and
+  the default view stays clean.
 
 **These are first-class requirements** — treated as non-negotiable from the start, on every page and
 in every tool:
@@ -83,14 +117,27 @@ Why subfolders instead of subdomains: [docs/DECISIONS.md](docs/DECISIONS.md).
 
 ## 4. How content gets edited (without touching code)
 
-Human-written text lives under [`content/`](content/), organized so each author edits only their
-section:
+The site carries three *kinds* of text, and they are authored differently. Two of them live in a
+Country Profile:
 
-- **Country profiles are Word documents** (`content/profiles/<country>.docx`). Non-technical authors
-  edit them in Word; the site renders the `.docx` directly in the browser (via mammoth.js) — no
-  Markdown, no conversion step. ([ADR-006](docs/DECISIONS.md).)
-- **Site copy and indicator notes are Markdown** (`content/site/`, `content/indicators/`) — lighter
-  text, optionally edited in a WYSIWYG Markdown app.
+1. **Standardized profile context (AI-generated first, then rewritten by authors).** Each Country
+   Profile includes a little written context under **fixed rubrics** — the same headings and prompts
+   for every country (e.g. a one-line orientation, what's notable in the trend, key caveats). Because
+   the rubrics are standardized and instruction-driven, we **seed every country's text with AI** so
+   nothing is blank on day one, and **label it clearly as AI-generated**. Authors then work through
+   countries and **rewrite** the AI draft; once a section is human-written, the AI label comes off.
+   This is stored as structured text per country (not a Word doc). ([ADR-007](docs/DECISIONS.md).)
+2. **Country deepdives (Word documents, by non-technical authors).** Some countries get a richer,
+   longer, human-written **deepdive**. *These* are the Word documents non-technical authors edit
+   (`content/profiles/deepdives/<country>.docx`), rendered in the browser via mammoth.js — no
+   Markdown, no conversion step. A deepdive is **optional per country**; where one exists, the profile
+   shows a **prominent link** to it and the country is flagged in the selection tree.
+   ([ADR-006](docs/DECISIONS.md).)
+3. **Site copy and indicator notes are Markdown** (`content/site/`, `content/indicators/`) — lighter
+   text, optionally edited in a WYSIWYG Markdown app.
+
+So the *main* profile page does **not** require the Word-document workflow — its context is the
+standardized AI/authored text plus figures. The Word-document workflow is specifically for **deepdives**.
 
 Authors are also shielded from GitHub: the Box folder shares files, and a maintainer (or a scheduled
 auto-push) publishes to the live site. This removes the pressure to polish everything before shipping
@@ -125,7 +172,7 @@ childhealth2050/                 repo root = site root (served at childhealth205
 ├── data-processing/             pipeline scripts (committed); raw/ + intermediate/ stay OFF git
 ├── profiles/                    Tool 1 — Country Profiles
 ├── data/                        Tool 2 — Indicator Explorer (a subsite, not storage)
-├── tools/                       maintainer scripts (e.g. regenerate the profiles list)
+├── tools/                       maintainer scripts (e.g. regenerate the deepdive list)
 ├── countries-like-mine/         Tool 3 — Countries Like Mine
 ├── trajectories/                Tool 4 — Future Trajectories
 ├── docs/                        architecture, decisions, editing & deployment guides
@@ -133,6 +180,17 @@ childhealth2050/                 repo root = site root (served at childhealth205
 ```
 
 Every folder above contains a `README.md` describing its purpose and conventions.
+
+Inside `content/profiles/` the two profile text kinds are kept apart (see §4):
+
+```
+content/profiles/
+├── standardized/    per-country standardized context (AI-generated first, then author-rewritten)
+├── deepdives/       optional per-country Word deepdives (.docx, rendered via mammoth.js)
+├── rubrics.md       the fixed rubric headings + AI-generation instructions (shared by all countries)
+├── _TEMPLATE.docx   starting point for a new deepdive
+└── deepdives.json   generated manifest of which countries have a deepdive (drives the tree flag)
+```
 
 ---
 
@@ -177,6 +235,13 @@ comparative-learning workflow first.
   the natural default).
 - **Exact folder/URL names** — `data`, `countries-like-mine`, `trajectories` are provisional
   and cheap to rename now, expensive after we share links publicly.
+- **Country-tree grouping** — the searchable selection tree needs a grouping. Default assumption is
+  **by region**; income-group grouping (or a toggle between them) is a possible refinement. See
+  [ADR-008](docs/DECISIONS.md).
+- **Comparator defaults** — "Countries Like Mine" defaults to the **closest 3** countries via an
+  automated composite (GDP, mortality, life expectancy, location, …), user-changeable. The exact
+  similarity method and dimension weights are a data-processing decision to finalize.
+  See [ADR-008](docs/DECISIONS.md).
 - **Repo visibility — settled.** The repo is public (free GitHub Pages); the internal planning
   notes stay git-ignored and were never committed. See [DEPLOYMENT](docs/DEPLOYMENT.md).
 - **Timing.** The plan is to wait until related papers and profile materials mature before

@@ -8,8 +8,12 @@ New here? Start with **[PLAN.md](PLAN.md)** for what we're building and why, the
 
 ## What this is
 
-A single-repository, static, multi-tool dashboard. A landing page routes to four tools, each
-living in its own subfolder that maps to a URL path:
+A single-repository, static **data dashboard**. The four tools are different ways to slice and
+compare one shared dataset — one country at a glance, one indicator across countries, a country
+against statistically-similar peers, or a country's path to 2050. Country Profiles also carry a
+little standardized written context (AI-generated first, then author-rewritten) and, where available,
+a link to a richer author **deep dive**. A landing page routes to four tools, each living in its own
+subfolder that maps to a URL path:
 
 | Folder | URL | Tool |
 |--------|-----|------|
@@ -43,8 +47,10 @@ plain pages, but a server is needed once pages fetch data files.)
 
 ## Edit the words (no coding needed)
 
-All human-written text lives under [`content/`](content/) as Markdown. Find the file for your
-section, edit it, save. See [docs/CONTENT-EDITING.md](docs/CONTENT-EDITING.md).
+Human-written text lives under [`content/`](content/): site copy and indicator notes as Markdown,
+per-country **standardized profile context** as structured text (AI-generated first, clearly labeled,
+then authors rewrite it), and optional richer **deep dives** as Word (`.docx`) files. Find the file
+for your section, edit it, save. See [docs/CONTENT-EDITING.md](docs/CONTENT-EDITING.md).
 
 ## Update the data
 
@@ -61,8 +67,11 @@ on keeping internal material out of the public repo.
 
 ## Status
 
-Early scaffold. The structure, docs, and a click-through skeleton exist — a landing page, four
-placeholder tool pages with shared nav/styling, and Country Profiles that render authors' Word
-(`.docx`) files in the browser. There's no real data or finished tool yet; the structure is ready
-for content as the related papers and profile materials mature. Every page must stay **responsive
-(desktop + mobile)** and **light/dark‑mode aware** — see [PLAN.md](PLAN.md).
+Early scaffold. The structure, docs, and a click-through skeleton exist — a landing page and four
+placeholder tool pages with shared nav/styling. The current Country Profiles page is a placeholder
+that renders a Word (`.docx`) file in the browser via mammoth.js; under the new plan that mechanism
+moves to the optional **deep dives**, while the main profile page becomes figures + tables +
+standardized (AI-labeled) text with a searchable country tree — not yet built. There's no real data
+or finished tool yet; the structure is ready for content as the related papers and profile materials
+mature. Every page must stay **responsive (desktop + mobile)** and **light/dark‑mode aware** — see
+[PLAN.md](PLAN.md).

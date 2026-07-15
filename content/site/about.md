@@ -1,11 +1,14 @@
 # About Child Health 2050
 
-*(Placeholder — an example of the kind of copy that belongs in `content/site/`.)*
-
 Child Health 2050 ("Compass") helps people explore child health outcomes and learn from countries
 that achieved better results.
 
-## What belongs in `content/site/`
+The site is built as a dashboard-first experience: users can compare indicators across countries,
+explore a country's profile, and then look at countries that are statistically similar. Country
+profiles also include brief written context that can start as an AI-generated draft and later be
+reviewed and rewritten by authors.
+
+## What belongs in content/site/
 
 Site-wide text that isn't tied to a single country or indicator — for example:
 
@@ -14,5 +17,5 @@ Site-wide text that isn't tied to a single country or indicator — for example:
 - a short methodology / data-sources blurb,
 - footer text, disclaimers, and shared notices.
 
-Country-specific narratives go in [`content/profiles/`](../profiles/); per-indicator descriptions
-go in [`content/indicators/`](../indicators/). Anything that spans the whole site lives here.
+Country-specific narratives go in [content/profiles/](../profiles/); per-indicator descriptions go in
+[content/indicators/](../indicators/). Anything that spans the whole site lives here.

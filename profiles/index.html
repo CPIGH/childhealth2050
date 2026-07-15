@@ -4,9 +4,15 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Country Profiles — Child Health 2050</title>
-  <meta name="description" content="Per-country child health scorecards and narratives." />
+  <meta name="description" content="Per-country child health dashboard: figures, tables, standardized context, and deep dives." />
   <link rel="stylesheet" href="../assets/css/site.css" />
-  <!-- Renders authors' Word (.docx) files in the browser. Vendored locally (no CDN). -->
+
+  <!-- Social sharing (Open Graph / Twitter). Swap in a real card image before launch. -->
+  <meta property="og:title" content="Country Profiles — Child Health 2050" />
+  <meta property="og:description" content="Per-country child health dashboard: figures, tables, standardized context, and deep dives." />
+  <meta property="og:type" content="website" />
+
+  <!-- Renders authors' Word (.docx) deep dives in the browser. Vendored locally (no CDN). -->
   <script src="../assets/js/mammoth.browser.min.js"></script>
 </head>
 <body>
@@ -19,26 +25,67 @@
   </div></nav>
 
   <main class="wrap">
-    <a class="back" href="../" id="back" hidden>← All countries</a>
-
-    <!-- shown when no ?country= is selected -->
-    <section id="list">
+    <!-- 1. LIST VIEW — searchable tree of all countries (shown when no ?country=) -->
+    <section id="list" hidden>
       <h1>Country Profiles</h1>
       <p class="tagline">Pick a country to see its profile.</p>
       <p class="placeholder">
-        Placeholder. Each country is a <strong>Word document</strong> in <code>content/profiles/</code>
-        (named as you want the link to read). The list below is generated from
-        <code>profiles.json</code> — add a <code>.docx</code>, republish, and it appears here.
+        Placeholder scaffold. Countries come from <code>assets/data/countries.json</code> (a starter
+        list, to be replaced by the canonical dataset). A <span class="badge">deep dive</span> flag
+        marks countries with an author deep dive.
       </p>
-      <ul class="country-list" id="country-list"></ul>
+      <input id="search" class="search" type="search" placeholder="Search all countries…"
+             aria-label="Search all countries" autocomplete="off" />
+      <div class="tree" id="tree"></div>
     </section>
 
-    <!-- shown when a ?country= is selected; filled from the .docx file -->
-    <article id="view" class="prose" hidden></article>
+    <!-- 2. PROFILE VIEW — figures/tables + standardized context + deep-dive link (shown for ?country=) -->
+    <section id="profile" hidden>
+      <a class="back" href="../profiles/">← All countries</a>
+      <h1 id="profile-name"></h1>
+      <p class="tagline" id="profile-region"></p>
+
+      <div class="profile-section">
+        <h2>Figures &amp; tables</h2>
+        <p class="placeholder">The country dashboard (mortality, nutrition, coverage, equity,
+          financing, outlook) will render here from <code>assets/data/</code>. Not built yet.</p>
+      </div>
+
+      <div class="profile-section">
+        <h2>Background statistics</h2>
+        <p class="placeholder">Key summary statistics for this country will appear here.</p>
+      </div>
+
+      <div class="profile-section">
+        <h2>Context</h2>
+        <div id="ai-banner" class="ai-banner" hidden>
+          <strong>AI-generated draft.</strong> This standardized context was drafted by AI and has
+          not yet been reviewed by an author.
+        </div>
+        <div id="context" class="prose"></div>
+      </div>
+
+      <div class="profile-section" id="deepdive-cta" hidden>
+        <h2>Go deeper</h2>
+        <a class="deepdive-link" id="deepdive-link" href="#">Read the in-depth country deep dive →</a>
+      </div>
+    </section>
+
+    <!-- 3. DEEP-DIVE VIEW — the author's Word document, rendered (shown for ?country=…&view=deepdive) -->
+    <section id="deepdive" hidden>
+      <a class="back" id="deepdive-back" href="#">← Back to profile</a>
+      <p class="placeholder">Author deep dive — a fuller, human-written piece for this country.</p>
+      <article id="deepdive-content" class="prose"></article>
+    </section>
   </main>
 
   <script>
-    const PROFILES_JSON = "../content/profiles/profiles.json";
+    const COUNTRIES_JSON = "../assets/data/countries.json";
+    const DEEPDIVES_JSON = "../content/profiles/deepdives.json";
+    const STANDARDIZED_DIR = "../content/profiles/standardized/";
+    const DEEPDIVES_DIR = "../content/profiles/deepdives/";
+
+    const $ = id => document.getElementById(id);
     const escapeHtml = s => s.replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
     const note = msg => `<div class="placeholder">${msg}</div>`;
     const serverHint =
@@ -46,52 +93,174 @@
       `Run a local server from the repo root — <code>python -m http.server 8000</code> — then open ` +
       `<code>http://localhost:8000/profiles/</code>.`;
 
-    let _manifest = null;
-    async function manifest() {
-      if (_manifest) return _manifest;
-      const res = await fetch(PROFILES_JSON, { cache: "no-cache" });
-      if (!res.ok) throw new Error("profiles.json HTTP " + res.status);
-      _manifest = await res.json();
-      return _manifest;
+    // --- tiny fetch-once helpers -------------------------------------------------
+    let _countries = null, _deepdives = null;
+    async function countries() {
+      if (!_countries) {
+        const res = await fetch(COUNTRIES_JSON, { cache: "no-cache" });
+        if (!res.ok) throw new Error("countries.json HTTP " + res.status);
+        _countries = await res.json();
+      }
+      return _countries;
+    }
+    async function deepdives() {
+      if (!_deepdives) {
+        try {
+          const res = await fetch(DEEPDIVES_JSON, { cache: "no-cache" });
+          _deepdives = res.ok ? await res.json() : [];
+        } catch { _deepdives = []; }
+      }
+      return _deepdives;
     }
 
+    // --- minimal Markdown: frontmatter + the subset the standardized files use ----
+    function parseDoc(text) {
+      text = text.replace(/\r\n/g, "\n");
+      const meta = {};
+      let body = text;
+      if (text.startsWith("---\n")) {
+        const end = text.indexOf("\n---", 4);
+        if (end !== -1) {
+          text.slice(4, end).split("\n").forEach(line => {
+            const i = line.indexOf(":");
+            if (i > 0) meta[line.slice(0, i).trim()] = line.slice(i + 1).replace(/\s+#.*$/, "").trim();
+          });
+          const rest = text.slice(end + 1);          // starts with the closing "---"
+          const nl = rest.indexOf("\n");
+          body = nl === -1 ? "" : rest.slice(nl + 1);
+        }
+      }
+      return { meta, body };
+    }
+    function inline(s) {
+      return escapeHtml(s)
+        .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
+        .replace(/\*(.+?)\*/g, "<em>$1</em>")
+        .replace(/\[([^\]]+)\]\(([^)]+)\)/g, (m, t, u) => `<a href="${u}">${t}</a>`);
+    }
+    function renderMd(md) {
+      let html = "", list = null, para = [];
+      const flushPara = () => { if (para.length) { html += `<p>${inline(para.join(" "))}</p>`; para = []; } };
+      const flushList = () => { if (list) { html += `<ul>${list.join("")}</ul>`; list = null; } };
+      for (const raw of md.split("\n")) {
+        const t = raw.trim();
+        let m;
+        if (!t) { flushPara(); flushList(); continue; }
+        if (m = t.match(/^(#{1,6})\s+(.*)$/)) { flushPara(); flushList(); const l = m[1].length; html += `<h${l}>${inline(m[2])}</h${l}>`; continue; }
+        if (m = t.match(/^[-*]\s+(.*)$/)) { flushPara(); (list = list || []).push(`<li>${inline(m[1])}</li>`); continue; }
+        flushList(); para.push(t);
+      }
+      flushPara(); flushList();
+      return html;
+    }
+
+    // --- VIEW 1: the searchable country tree -------------------------------------
     async function showList() {
-      const ul = document.getElementById("country-list");
+      const tree = $("tree");
+      let list, dd;
+      try { [list, dd] = await Promise.all([countries(), deepdives()]); }
+      catch (e) { tree.innerHTML = note("Couldn't load the country list (" + e.message + "). " + serverHint); return; }
+
+      const hasDeepdive = new Set(dd.map(d => d.slug));
+      const regions = [];               // preserve first-seen order
+      const byRegion = new Map();
+      for (const c of list) {
+        if (!byRegion.has(c.region)) { byRegion.set(c.region, []); regions.push(c.region); }
+        byRegion.get(c.region).push(c);
+      }
+      tree.innerHTML = regions.map(region => {
+        const items = byRegion.get(region).map(c => {
+          const badge = hasDeepdive.has(c.slug) ? ` <span class="badge">deep dive</span>` : "";
+          return `<li><a href="?country=${encodeURIComponent(c.slug)}" data-name="${escapeHtml(c.name.toLowerCase())}">${escapeHtml(c.name)}${badge}</a></li>`;
+        }).join("");
+        return `<section class="region"><h2>${escapeHtml(region)}</h2><ul class="country-list">${items}</ul></section>`;
+      }).join("");
+
+      // search: filter countries by name, hide regions that end up empty
+      const search = $("search");
+      const apply = () => {
+        const q = search.value.trim().toLowerCase();
+        tree.querySelectorAll(".region").forEach(sec => {
+          let shown = 0;
+          sec.querySelectorAll("a").forEach(a => {
+            const match = !q || a.dataset.name.includes(q);
+            a.parentElement.hidden = !match;
+            if (match) shown++;
+          });
+          sec.hidden = shown === 0;
+        });
+      };
+      search.oninput = apply;
+      apply();
+    }
+
+    // --- VIEW 2: a country profile (figures placeholder + standardized context) ---
+    async function showProfile(slug) {
+      let list, dd;
+      try { [list, dd] = await Promise.all([countries(), deepdives()]); }
+      catch (e) { $("context").innerHTML = note("Couldn't load country data (" + e.message + "). " + serverHint); return; }
+
+      const country = list.find(c => c.slug === slug);
+      if (!country) { $("profile-name").textContent = "Unknown country"; $("context").innerHTML = note(`No country with id “${escapeHtml(slug)}”. <a href="../profiles/">See all countries</a>.`); return; }
+
+      $("profile-name").textContent = country.name;
+      $("profile-region").textContent = country.region;
+      document.title = country.name + " — Country Profile — Child Health 2050";
+
+      // standardized context (AI-generated first, labeled until author-reviewed)
       try {
-        const items = await manifest();
-        ul.innerHTML = items.length
-          ? items.map(e => `<li><a href="?country=${encodeURIComponent(e.slug)}">${escapeHtml(e.label)}</a></li>`).join("")
-          : "<li>(no profiles yet — drop a .docx into content/profiles/)</li>";
+        const res = await fetch(STANDARDIZED_DIR + slug + ".md", { cache: "no-cache" });
+        if (res.ok) {
+          const { meta, body } = parseDoc(await res.text());
+          $("context").innerHTML = renderMd(body);
+          $("ai-banner").hidden = (meta.status === "author-reviewed");
+        } else if (res.status === 404) {
+          $("context").innerHTML = note(`Standardized context for ${escapeHtml(country.name)} hasn't been added yet.`);
+        } else {
+          throw new Error("HTTP " + res.status);
+        }
       } catch (e) {
-        ul.innerHTML = `<li>${note("Couldn't load the profile list (" + e.message + "). " + serverHint)}</li>`;
+        $("context").innerHTML = note("Couldn't load the context text (" + e.message + "). " + serverHint);
+      }
+
+      // prominent deep-dive link, only when one exists
+      const entry = dd.find(d => d.slug === slug);
+      if (entry) {
+        $("deepdive-link").href = `?country=${encodeURIComponent(slug)}&view=deepdive`;
+        $("deepdive-cta").hidden = false;
       }
     }
 
-    async function showCountry(slug) {
-      const view = document.getElementById("view");
+    // --- VIEW 3: an author deep dive (.docx rendered in the browser) --------------
+    async function showDeepDive(slug) {
+      $("deepdive-back").href = `?country=${encodeURIComponent(slug)}`;
+      const content = $("deepdive-content");
       if (typeof mammoth === "undefined") {
-        view.innerHTML = note("The document renderer (<code>assets/js/mammoth.browser.min.js</code>) didn't load.");
+        content.innerHTML = note("The document renderer (<code>assets/js/mammoth.browser.min.js</code>) didn't load.");
         return;
       }
       try {
-        const entry = (await manifest()).find(e => e.slug === slug);
-        if (!entry) throw new Error("no profile named “" + slug + "”");
-        const res = await fetch("../content/profiles/" + encodeURIComponent(entry.file));
+        const dd = await deepdives();
+        const entry = dd.find(d => d.slug === slug);
+        if (!entry) throw new Error("no deep dive for “" + slug + "”");
+        const res = await fetch(DEEPDIVES_DIR + encodeURIComponent(entry.file), { cache: "no-cache" });
         if (!res.ok) throw new Error("HTTP " + res.status);
         const result = await mammoth.convertToHtml({ arrayBuffer: await res.arrayBuffer() });
-        view.innerHTML = result.value;
-        document.title = entry.label + " — Country Profile";
+        content.innerHTML = result.value;
+        document.title = entry.label + " — Deep dive — Child Health 2050";
       } catch (e) {
-        view.innerHTML = note(`Couldn't load that profile (${e.message}). ` + serverHint);
+        content.innerHTML = note(`Couldn't load that deep dive (${e.message}). ` + serverHint);
       }
     }
 
+    // --- router: pick a view from the URL ----------------------------------------
     (function () {
-      const slug = new URLSearchParams(location.search).get("country");
-      document.getElementById("list").hidden = !!slug;
-      document.getElementById("view").hidden = !slug;
-      document.getElementById("back").hidden = !slug;
-      if (slug) showCountry(slug); else showList();
+      const params = new URLSearchParams(location.search);
+      const slug = params.get("country");
+      const view = params.get("view");
+      if (slug && view === "deepdive") { $("deepdive").hidden = false; showDeepDive(slug); }
+      else if (slug) { $("profile").hidden = false; showProfile(slug); }
+      else { $("list").hidden = false; showList(); }
     })();
   </script>
 </body>

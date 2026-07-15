@@ -10,20 +10,19 @@
 
 ## How it works (static site)
 
-Forecasts are **precomputed** in [`data-processing/`](../data-processing/) and shipped as lean data files;
-the page just renders them. No live modeling in the browser or on a server
-(see [ADR-002](../docs/DECISIONS.md)).
+Forecasts are **precomputed** in [data-processing/](../data-processing/) and shipped as lean data files;
+the page just renders them. No live modeling in the browser or on a server (see [ADR-002](../docs/DECISIONS.md)).
 
 ## Content & data
 
-- Method notes / assumptions / caveats: [`content/`](../content/).
-- Forecast series + intervals: [`assets/data/`](../assets/data/), fetched on demand. Mortality line charts are
-  the larger files (usually <4 MB) — keep them split and rounded.
+- Method notes / assumptions / caveats: [content/](../content/).
+- Forecast series + intervals: [assets/data/](../assets/data/), fetched on demand.
 
 ## Link sharing
 
-State in the query string, e.g. `/trajectories/?country=NGA&indicator=u5mr`.
+State lives in the query string, for example `/trajectories/?country=NGA&indicator=u5mr`.
 
 ## Status
 
-A placeholder `index.html` exists (shared nav + description). The forecast views aren't built yet.
+A placeholder index.html exists, but the intended experience is a forecast view that remains easy to
+access from country profiles and the broader dashboard flow.

@@ -4,7 +4,7 @@ Run this to put pending content changes onto the live site:
 
     python tools/publish.py
 
-It (1) regenerates content/profiles/profiles.json, (2) stages everything, (3) commits — only if
+It (1) regenerates content/profiles/deepdives.json, (2) stages everything, (3) commits — only if
 something actually changed — and (4) pushes. GitHub Pages then rebuilds within a minute or two.
 
 One-time setup per machine:
@@ -30,9 +30,9 @@ def git(*args, check=True):
 
 
 def main():
-    # 1. regenerate the profiles manifest
-    print("· regenerating the country-profiles list …")
-    subprocess.run([sys.executable, os.path.join(HERE, "build-profiles-index.py")], check=True)
+    # 1. regenerate the deep-dives manifest
+    print("· regenerating the country deep-dives list …")
+    subprocess.run([sys.executable, os.path.join(HERE, "build-deepdives-index.py")], check=True)
 
     # 2. stage everything
     git("add", "-A")
